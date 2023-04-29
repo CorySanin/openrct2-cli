@@ -1,6 +1,6 @@
 # Build OpenRCT2
-FROM alpine:3.16 AS build-env
-RUN apk add --no-cache git gcc g++ make cmake nlohmann-json libzip-dev curl-dev fontconfig-dev fts-dev icu-dev musl-dev linux-headers
+FROM alpine:3.17 AS build-env
+RUN apk add --no-cache git gcc g++ make cmake nlohmann-json libzip-dev curl-dev fontconfig-dev icu-dev musl-dev linux-headers
 
 ARG OPENRCT2_REF=develop
 WORKDIR /openrct2
@@ -15,7 +15,7 @@ RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.
  && rm -rf /openrct2-install/usr/share/openrct2-cli
 
 # Build runtime image
-FROM alpine:3.16
+FROM alpine:3.17
 COPY --from=build-env /openrct2-install /openrct2-install
 RUN apk add --no-cache rsync ca-certificates libpng libzip libcurl freetype fontconfig icu \
  && rsync -a /openrct2-install/* / \
