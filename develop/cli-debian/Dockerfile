@@ -2,7 +2,7 @@
 FROM debian:bullseye-slim AS build-env
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
- && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang-11 nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev \
+ && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang-11 nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev libflac-dev libvorbis-dev \
  && rm -rf /var/lib/apt/lists/* \
  && ln -s /usr/bin/clang-11 /usr/bin/clang \
  && ln -s /usr/bin/clang++-11 /usr/bin/clang++

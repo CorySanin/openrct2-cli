@@ -2,7 +2,7 @@
 FROM ubuntu:22.04 AS build-env
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
- && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang-12 ccache nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev \
+ && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang-12 nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev libflac-dev libvorbis-dev ccache \
  && rm -rf /var/lib/apt/lists/* \
  && ln -s /usr/bin/clang-12 /usr/bin/clang \
  && ln -s /usr/bin/clang++-12 /usr/bin/clang++
