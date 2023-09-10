@@ -28,10 +28,9 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && rsync -a /openrct2-install/* / \
  && rm -rf /openrct2-install \
- && openrct2-cli --version
-
+ && openrct2-cli --version \
 # Set up ordinary user
-RUN useradd -m openrct2
+ && useradd -m openrct2
 USER openrct2
 WORKDIR /home/openrct2
 EXPOSE 11753
