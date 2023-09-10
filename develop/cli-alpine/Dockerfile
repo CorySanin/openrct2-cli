@@ -1,5 +1,5 @@
 # Build OpenRCT2
-FROM alpine:3.17 AS build-env
+FROM alpine:3.18 AS build-env
 RUN apk add --no-cache git gcc g++ make cmake nlohmann-json libzip-dev curl-dev fontconfig-dev icu-dev musl-dev linux-headers
 
 ARG OPENRCT2_REF=develop
@@ -15,7 +15,12 @@ RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.
  && rm -rf /openrct2-install/usr/share/openrct2-cli
 
 # Build runtime image
-FROM alpine:3.17
+FROM alpine:3.18
+HEALTHCHECK  --timeout=3s --interval=120s \
+  CMD [[ -z "$(ps aux | grep openrct2-cli | grep host | grep -v grep)" ]] || \
+      [[ -n "$(ps aux | grep openrct2-cli | grep -- "--port" | grep -v grep)" ]] || \
+      [[ -n "$(netstat -tlnp | grep openrct2-cli | grep "$(cat '.config/OpenRCT2/config.ini' | grep 'default_port' | awk '{print $NF}' )" )" ]]  || \
+      exit 1
 COPY --from=build-env /openrct2-install /openrct2-install
 RUN apk add --no-cache rsync ca-certificates libpng libzip libcurl freetype fontconfig icu \
  && rsync -a /openrct2-install/* / \
