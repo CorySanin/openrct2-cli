@@ -18,15 +18,10 @@ ubuntu-image:
     script:
         - docker build --no-cache --build-arg "OPENRCT2_REF=$BRANCH" -t "corysanin/openrct2-cli:$TAG-ubuntu" -f ./develop/cli-ubuntu/Dockerfile .
 
-debian-image:
-    stage: build
-    script:
-        - docker build --no-cache --build-arg "OPENRCT2_REF=$BRANCH" -t "corysanin/openrct2-cli:$TAG-debian" -t "corysanin/openrct2-cli:$TAG" -t "$CI_REGISTRY_IMAGE:$TAG" -f ./develop/cli-debian/Dockerfile .
-
 alpine-image:
    stage: build
    script:
-       - docker build --no-cache --build-arg "OPENRCT2_REF=$BRANCH" -t "corysanin/openrct2-cli:$TAG-alpine" -f ./develop/cli-alpine/Dockerfile .
+       - docker build --no-cache --build-arg "OPENRCT2_REF=$BRANCH" -t "corysanin/openrct2-cli:$TAG-alpine" -t "corysanin/openrct2-cli:$TAG" -t "$CI_REGISTRY_IMAGE:$TAG" -f ./develop/cli-alpine/Dockerfile .
    
 deploy:
     stage: deploy
@@ -36,7 +31,6 @@ deploy:
         - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
         - docker push "corysanin/openrct2-cli:$TAG-ubuntu"
         - docker push "corysanin/openrct2-cli:$TAG-alpine"
-        - docker push "corysanin/openrct2-cli:$TAG-debian"
         - docker push "corysanin/openrct2-cli:$TAG"
         - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
         - docker push "$CI_REGISTRY_IMAGE:$TAG"
