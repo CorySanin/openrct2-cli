@@ -8,12 +8,10 @@ RUN apt-get update \
 ARG OPENRCT2_REF=develop
 WORKDIR /openrct2
 RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.com/OpenRCT2/OpenRCT2 . \
- && sed -i '/g2.dat/d' "CMakeLists.txt" \
- && sed -i '/fonts.dat/d' "CMakeLists.txt" \
  && mkdir build \
  && cd build \
  && cmake .. -G Ninja -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/openrct2-install/usr -DDISABLE_GUI=ON -DENABLE_HEADERS_CHECK=OFF \
- && ninja -k0 install \
+ && ninja -k0 graphics install \
  && rm /openrct2-install/usr/lib/libopenrct2.a
 
 # Build runtime image

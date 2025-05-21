@@ -6,12 +6,10 @@ RUN apk add --no-cache git gcc g++ make cmake nlohmann-json libzip-dev curl-dev 
 ARG OPENRCT2_REF=develop
 WORKDIR /openrct2
 RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.com/OpenRCT2/OpenRCT2 . \
- && sed -i '/g2.dat/d' "CMakeLists.txt" \
- && sed -i '/fonts.dat/d' "CMakeLists.txt" \
  && mkdir build \
  && cd build \
  && cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/openrct2-install/usr -DCMAKE_INSTALL_LIBDIR=/openrct2-install/usr/lib -DDISABLE_OPENGL=ON -DDISABLE_GUI=ON -DENABLE_HEADERS_CHECK=OFF \
- && make -j8 install \
+ && make -j8 graphics install \
  && rm /openrct2-install/usr/lib/libopenrct2.a
 
 # Build runtime image
