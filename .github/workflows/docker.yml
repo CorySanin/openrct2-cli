@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - &branch more
+    paths:
+      - .github/workflows/docker.yml
+      - develop/cli-alpine/Dockerfile
+      - develop/cli-ubuntu/Dockerfile
   pull_request:
     branches:
       - *branch
@@ -108,7 +112,7 @@ jobs:
     env:
       IMAGE_NAME: ${{ needs.lowercasify.outputs.image_name }}
       REPOSITORY: ${{ needs.lowercasify.outputs.repo_name }}
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/more'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/more'
 
     steps:
       - name: Login to GitHub Container Registry
