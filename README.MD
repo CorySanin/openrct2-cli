@@ -10,7 +10,7 @@ This repository contains `Dockerfile` definitions for the command line version O
 
 You can pull and test the latest develop version by running:
 ```
-$ docker run --rm corysanin/openrct2-cli:develop --version
+$ docker run --rm ghcr.io/corysanin/openrct2-cli:develop --version
 ```
 
 ## Multiplayer
@@ -24,16 +24,21 @@ $ docker run --rm -p 11753:11753 -it corysanin/openrct2-cli host https://ffa-tyc
 All configuraion data is stored inside the container. If you want to persit it outside the container, you can mount it to a volume or your local filesystem. Mounting your local filesystem also allows you to read and write saved games locally. For example:
 
 ```
-$ docker run --rm -p 11753:11753 -v /home/me/openrct2-config:/home/openrct2/.config/OpenRCT2 -it corysanin/openrct2-cli host /home/openrct2/.config/OpenRCT2/save/mypark.sv6
+$ docker run --rm -p 11753:11753 -v /home/me/openrct2-config:/home/openrct2/.config/OpenRCT2 -it corysanin/openrct2-cli host /home/openrct2/.config/OpenRCT2/save/mypark.park
 ```
 
 The command above will mount the OpenRCT2 user / config directory inside the container to a directory on your local filesystem. This will allow you to persist and edit the configuration, saved games etc. locally.
 
-It will then host a new server and load the saved game `mypark.sv6` located in the mounted directory under the save sub-directory.
+It will then host a new server and load the saved game `mypark.park` located in the mounted directory under the save sub-directory.
+
+## Image
+
+- [`ghcr.io/corysanin/openrct2-cli`](https://github.com/CorySanin/openrct2-cli/pkgs/container/openrct2-cli)
+- [`docker.io/corysanin/openrct2-cli`](https://hub.docker.com/r/corysanin/openrct2-cli)
 
 ## Tags
 
-- [`develop-alpine`, `develop`](https://gitlab.com/CorySanin/openrct2-docker/-/blob/more/develop/cli-alpine/Dockerfile)
-- [`develop-ubuntu`](https://gitlab.com/CorySanin/openrct2-docker/-/blob/more/develop/cli-ubuntu/Dockerfile)
-- [`latest-alpine`, `latest`](https://gitlab.com/CorySanin/openrct2-docker/-/blob/more/develop/cli-alpine/Dockerfile)
-- [`latest-ubuntu`](https://gitlab.com/CorySanin/openrct2-docker/-/blob/more/develop/cli-ubuntu/Dockerfile)
+- [`develop-alpine`, `develop`](https://github.com/CorySanin/openrct2-cli/blob/more/develop/cli-alpine/Dockerfile)
+- [`develop-ubuntu`](https://github.com/CorySanin/openrct2-cli/blob/more/develop/cli-ubuntu/Dockerfile)
+- [`latest-alpine`, `latest`](https://github.com/CorySanin/openrct2-cli/blob/more/develop/cli-alpine/Dockerfile)
+- [`latest-ubuntu`](https://github.com/CorySanin/openrct2-cli/blob/more/develop/cli-ubuntu/Dockerfile)
