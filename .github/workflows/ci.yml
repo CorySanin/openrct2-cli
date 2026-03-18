@@ -1,5 +1,5 @@
 name: CI
-on: [push, pull_request]
+on: []
 env:
   dockerid: ${{ secrets.dockerid }}
   dockerpass: ${{ secrets.dockerpass }}
