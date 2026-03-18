@@ -1,0 +1,169 @@
+name: MultiArchDockerBuild
+
+on:
+  push:
+    branches:
+      - &branch more
+  pull_request:
+    branches:
+      - *branch
+  workflow_dispatch:
+    inputs:
+      release:
+        description: The release type
+        type: choice
+        options:
+          - release
+          - develop
+        default: develop
+
+env:
+  DH_REGISTRY: docker.io
+  GH_REGISTRY: ghcr.io
+  DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+  TAG: id-${{ github.run_id }}-${{ github.run_attempt }}
+  RELTYPE: ${{ inputs.release || 'develop' }}
+
+jobs:
+  lowercasify:
+    permissions: {}
+    runs-on: ubuntu-24.04
+    outputs:
+      image_name: ${{ steps.image.outputs.image_name }}
+      repo_name: ${{ steps.repo.outputs.repo_name }}
+    steps:
+      - name: Lowercase image name
+        id: image
+        run: |
+          echo "image_name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+      - name: Lowercase repo name
+        id: repo
+        run: |
+          echo "repo_name=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+  build_image:
+    name: Build Docker image
+    strategy:
+      matrix:
+        dockercontext:
+          - alpine
+          - ubuntu
+        arch:
+          - x86
+          - ARM
+        include:
+          - arch: x86
+            os: ubuntu-24.04
+          - arch: ARM
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    needs:
+      - lowercasify
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE_NAME: ${{ needs.lowercasify.outputs.image_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GH_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push release Docker image
+        uses: docker/build-push-action@v6
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+        with:
+          target: deploy
+          push: true
+          context: ./develop/cli-${{ matrix.dockercontext }}
+          tags: ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}-${{ matrix.dockercontext }}-${{ matrix.arch }}
+          cache-from: type=gha,scope=${{ github.workflow }}
+          cache-to: type=gha,mode=max,scope=${{ github.workflow }}
+  
+  combine-images:
+    name: Combine Docker images
+    runs-on: ubuntu-24.04
+    needs:
+      - lowercasify
+      - build_image
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        dockercontext:
+          - alpine
+          - ubuntu
+    env:
+      IMAGE_NAME: ${{ needs.lowercasify.outputs.image_name }}
+      REPOSITORY: ${{ needs.lowercasify.outputs.repo_name }}
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/more'
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GH_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DH_REGISTRY }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Define tag base
+        run: |
+          echo "TAGBASE=${{ case(env.RELTYPE == 'release', 'latest', 'develop') }}" >> "$GITHUB_ENV"
+
+      - name: Define tag patterns
+        # todo: add back `echo "${{ env.DH_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.REPOSITORY }}"`
+        run: |
+          {
+            echo "PIMAGES<<EOF"
+            echo "${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}"
+            echo "EOF"
+            echo "PTAGS<<EOF"
+            echo "type=raw,value=${{ env.TAGBASE }}-${{ matrix.dockercontext }}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+      
+      - name: Add default tag
+        if: matrix.dockercontext == 'alpine'
+        run: |
+          {
+            echo "PTAGS<<EOF"
+            echo "${{ env.PTAGS }}"
+            echo "type=raw,value=${{ env.TAGBASE }}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+      
+      - name: Extract metadata for Docker image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.PIMAGES }}
+          tags: ${{ env.PTAGS }}
+
+      - name: Combine JVM images into single manifest
+        uses: int128/docker-manifest-create-action@v2
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          index-annotations: ${{ steps.meta.outputs.labels }}
+          sources: |
+            ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}-${{ matrix.dockercontext }}-x86
+            ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}-${{ matrix.dockercontext }}-ARM

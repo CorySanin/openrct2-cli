@@ -1,5 +1,6 @@
+FROM ubuntu:24.04 AS base
 # Build OpenRCT2
-FROM ubuntu:24.04 AS build-env
+FROM base AS build-env
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev libflac-dev libvorbis-dev libzstd-dev \
@@ -16,7 +17,7 @@ RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.
  && rm /openrct2-install/usr/lib/libopenrct2.a
 
 # Build runtime image
-FROM ubuntu:24.04
+FROM base AS deploy
 # Install OpenRCT2
 COPY --from=build-env /openrct2-install /openrct2-install
 RUN apt-get update \

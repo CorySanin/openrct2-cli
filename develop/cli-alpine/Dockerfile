@@ -13,7 +13,7 @@ RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.
  && rm /openrct2-install/usr/lib/libopenrct2.a
 
 # Build runtime image
-FROM base
+FROM base AS deploy
 HEALTHCHECK  --timeout=3s --interval=120s \
   CMD [[ -z "$(ps aux | grep openrct2-cli | grep host | grep -v grep)" ]] || \
       [[ -n "$(ps aux | grep openrct2-cli | grep -- "--port" | grep -v grep)" ]] || \
