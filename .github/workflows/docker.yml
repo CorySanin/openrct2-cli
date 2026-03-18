@@ -88,8 +88,8 @@ jobs:
           push: true
           context: ./develop/cli-${{ matrix.dockercontext }}
           tags: ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}-${{ matrix.dockercontext }}-${{ matrix.arch }}
-          cache-from: type=gha,scope=${{ github.workflow }}
-          cache-to: type=gha,mode=max,scope=${{ github.workflow }}
+          # cache-from: type=gha,scope=${{ github.workflow }}
+          # cache-to: type=gha,mode=max,scope=${{ github.workflow }}
   
   combine-images:
     name: Combine Docker images
