@@ -13,12 +13,9 @@ on:
       - *branch
   workflow_dispatch:
     inputs:
-      release:
-        description: The release type
-        type: choice
-        options:
-          - release
-          - develop
+      branch:
+        description: The ref to checkout from the OpenRCT2 git repo
+        type: string
         default: develop
 
 env:
@@ -26,7 +23,7 @@ env:
   GH_REGISTRY: ghcr.io
   DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
   TAG: id-${{ github.run_id }}-${{ github.run_attempt }}
-  RELTYPE: ${{ inputs.release || 'develop' }}
+  BRANCH: ${{ inputs.branch || 'develop' }}
 
 jobs:
   lowercasify:
@@ -90,6 +87,8 @@ jobs:
         with:
           target: deploy
           push: true
+          build-args: |
+            OPENRCT2_REF=${{ env.BRANCH }}
           context: ./develop/cli-${{ matrix.dockercontext }}
           tags: ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}-${{ matrix.dockercontext }}-${{ matrix.arch }}
           # cache-from: type=gha,scope=${{ github.workflow }}
@@ -131,7 +130,7 @@ jobs:
       
       - name: Define tag base
         run: |
-          echo "TAGBASE=${{ case(env.RELTYPE == 'release', 'latest', 'develop') }}" >> "$GITHUB_ENV"
+          echo "TAGBASE=${{ case(env.BRANCH == 'develop', 'develop', 'latest') }}" >> "$GITHUB_ENV"
 
       - name: Define tag patterns
         # todo: add back `echo "${{ env.DH_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.REPOSITORY }}"`
