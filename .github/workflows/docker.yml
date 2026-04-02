@@ -134,11 +134,11 @@ jobs:
           echo "TAGBASE=${{ case(env.BRANCH == 'develop', 'develop', 'latest') }}" >> "$GITHUB_ENV"
 
       - name: Define tag patterns
-        # todo: add back `echo "${{ env.DH_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.REPOSITORY }}"`
         run: |
           {
             echo "PIMAGES<<EOF"
             echo "${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}"
+            echo "${{ env.DH_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.REPOSITORY }}"
             echo "EOF"
             echo "PTAGS<<EOF"
             echo "type=raw,value=${{ env.TAGBASE }}-${{ matrix.dockercontext }}"
