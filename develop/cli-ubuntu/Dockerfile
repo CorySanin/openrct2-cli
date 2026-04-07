@@ -27,7 +27,8 @@ RUN apt-get update \
  && rm -rf /openrct2-install \
  && openrct2-cli --version \
 # Set up ordinary user
- && useradd -m openrct2
+ && groupadd -g 1000 openrct2 \
+ && useradd -m -g openrct2 -u 1000 openrct2
 USER openrct2
 WORKDIR /home/openrct2
 EXPOSE 11753
