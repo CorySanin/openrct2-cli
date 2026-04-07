@@ -1,4 +1,4 @@
-FROM alpine:3.21 AS base
+FROM alpine:3.23 AS base
 # Build OpenRCT2
 FROM base AS build-env
 RUN apk add --no-cache git gcc g++ make cmake nlohmann-json libzip-dev curl-dev fontconfig-dev icu-dev musl-dev linux-headers zstd
@@ -19,7 +19,7 @@ HEALTHCHECK  --timeout=3s --interval=120s \
       [[ -n "$(ps aux | grep openrct2-cli | grep -- "--port" | grep -v grep)" ]] || \
       [[ -n "$(netstat -tlnp | grep openrct2-cli | grep "$(cat '.config/OpenRCT2/config.ini' | grep 'default_port' | awk '{print $NF}' )" )" ]]  || \
       exit 1
-COPY --from=build-env /openrct2-install /openrct2-install
+COPY --link --from=build-env /openrct2-install /openrct2-install
 RUN apk add --no-cache rsync ca-certificates libpng libzip libcurl freetype fontconfig icu zstd \
  && rsync -a /openrct2-install/* / \
  && rm -rf /openrct2-install \
