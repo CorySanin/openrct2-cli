@@ -3,12 +3,14 @@ FROM ubuntu:24.04 AS base
 FROM base AS build-env
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
- && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev libflac-dev libvorbis-dev libzstd-dev \
+ && apt-get install --no-install-recommends -y git cmake pkg-config ninja-build clang nlohmann-json3-dev libcurl4-openssl-dev libcrypto++-dev libfontconfig1-dev libfreetype6-dev libpng-dev libzip-dev libssl-dev libicu-dev libflac-dev libvorbis-dev libzstd-dev curl patch ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 ARG OPENRCT2_REF=develop
 WORKDIR /openrct2
 RUN git -c http.sslVerify=false clone --depth 1 -b $OPENRCT2_REF https://github.com/OpenRCT2/OpenRCT2 . \
+ && curl https://github.com/OpenRCT2/OpenRCT2/pull/26554.patch -L -o ./26554.patch \
+ && patch --strip=1 --input=./26554.patch \
  && mkdir build \
  && cd build \
  && cmake .. -G Ninja -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/openrct2-install/usr -DDISABLE_GUI=ON -DENABLE_HEADERS_CHECK=OFF \
