@@ -112,7 +112,7 @@ jobs:
     env:
       IMAGE_NAME: ${{ needs.lowercasify.outputs.image_name }}
       REPOSITORY: ${{ needs.lowercasify.outputs.repo_name }}
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/more'
+    if: github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/more' || github.ref == 'refs/heads/aux')
 
     steps:
       - name: Login to GitHub Container Registry
