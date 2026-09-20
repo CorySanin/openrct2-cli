@@ -157,10 +157,21 @@ jobs:
       
       - name: Extract metadata for Docker image
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.PIMAGES }}
           tags: ${{ env.PTAGS }}
+          labels: |
+            dev.dozzle.icon=openrct2
+            org.opencontainers.image.title=openrct2-cli
+            org.opencontainers.image.description=like openrct2/openrct2-cli, except develop only gets updated when the network version changes
+            org.opencontainers.image.authors=Cory Sanin <corysanin@outlook.com>
+            org.opencontainers.image.url=https://github.com/CorySanin/openrct2-cli
+            org.opencontainers.image.documentation=https://github.com/CorySanin/openrct2-cli#readme
+            org.opencontainers.image.source=https://github.com/CorySanin/openrct2-cli
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created={{ date 'YYYY-MM-DD[T]HH:mm:ss[Z]' }}
 
       - name: Combine JVM images into single manifest
         uses: int128/docker-manifest-create-action@v2
